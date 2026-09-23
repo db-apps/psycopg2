@@ -139,6 +139,11 @@ class CursorTests(ConnectingTestCase):
         self.assertRaises(psycopg2.ProgrammingError,
             cur.mogrify, "select %(foo, %(bar)", {'foo': 1, 'bar': 2})
 
+    def test_bad_params_number(self):
+        cur = self.conn.cursor()
+        self.assertRaises(IndexError, cur.execute, "select %s, %s", [1])
+        self.assertRaises(TypeError, cur.execute, "select %s", [1, 2])
+
     def test_cast(self):
         curs = self.conn.cursor()
 
@@ -379,6 +384,12 @@ class CursorTests(ConnectingTestCase):
     @skip_before_postgres(8, 2)
     def test_rowcount_on_executemany_returning(self):
         cur = self.conn.cursor()
+        try:
+            cur.execute("drop table execmany")
+            self.conn.commit()
+        except psycopg2.DatabaseError:
+            self.conn.rollback()
+
         cur.execute("create table execmany(id serial primary key, data int)")
         cur.executemany(
             "insert into execmany (data) values (%s)",
@@ -412,7 +423,7 @@ class CursorTests(ConnectingTestCase):
         self.assert_(curs.pgresult_ptr is None)
 
 
-@skip_if_crdb("named cursor")
+@skip_if_crdb("named cursor", version="< 22.1")
 class NamedCursorTests(ConnectingTestCase):
     def test_invalid_name(self):
         curs = self.conn.cursor()
@@ -436,6 +447,7 @@ class NamedCursorTests(ConnectingTestCase):
             curs.execute("insert into withhold values (%s)", (i,))
         curs.close()
 
+    @skip_if_crdb("cursor with hold")
     def test_withhold(self):
         self.assertRaises(psycopg2.ProgrammingError, self.conn.cursor,
                           withhold=True)
@@ -460,6 +472,7 @@ class NamedCursorTests(ConnectingTestCase):
         curs.execute("drop table withhold")
         self.conn.commit()
 
+    @skip_if_crdb("cursor with hold")
     def test_withhold_no_begin(self):
         self._create_withhold_table()
         curs = self.conn.cursor("w", withhold=True)
@@ -484,6 +497,7 @@ class NamedCursorTests(ConnectingTestCase):
         self.assertEqual(self.conn.info.transaction_status,
                          psycopg2.extensions.TRANSACTION_STATUS_IDLE)
 
+    @skip_if_crdb("cursor with hold")
     def test_withhold_autocommit(self):
         self._create_withhold_table()
         self.conn.commit()
@@ -506,6 +520,7 @@ class NamedCursorTests(ConnectingTestCase):
         self.assertEqual(self.conn.info.transaction_status,
                          psycopg2.extensions.TRANSACTION_STATUS_IDLE)
 
+    @skip_if_crdb("scroll cursor")
     def test_scrollable(self):
         self.assertRaises(psycopg2.ProgrammingError, self.conn.cursor,
                           scrollable=True)
@@ -679,6 +694,7 @@ class NamedCursorTests(ConnectingTestCase):
         self.assertRaises((IndexError, psycopg2.ProgrammingError),
             cur.scroll, 1)
 
+    @skip_if_crdb("scroll cursor")
     @skip_before_postgres(8, 0)
     def test_scroll_named(self):
         cur = self.conn.cursor('tmp', scrollable=True)

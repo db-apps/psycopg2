@@ -1,32 +1,35 @@
 name: Tests
 
+env:
+  PIP_BREAK_SYSTEM_PACKAGES: "1"
+
 on:
   push:
   pull_request:
 
 jobs:
-  tests:
-    name: Unit tests run
-    runs-on: ubuntu-20.04
+  linux:
+    runs-on: ubuntu-latest
+    if: true
 
     strategy:
       fail-fast: false
       matrix:
         include:
-          - {python: "3.6", postgres: "10"}
-          - {python: "3.7", postgres: "11"}
-          - {python: "3.8", postgres: "12"}
-          - {python: "3.9", postgres: "13"}
-          - {python: "3.10", postgres: "14"}
-          - {python: "3.11-dev", postgres: "14"}
+          - {python: "3.10", postgres: "13"}
+          - {python: "3.11", postgres: "14"}
+          - {python: "3.12", postgres: "15"}
+          - {python: "3.13", postgres: "16"}
+          - {python: "3.14", postgres: "17"}
+          - {python: "3.15", postgres: "18"}
 
           # Opposite extremes of the supported Py/PG range, other architecture
-          - {python: "3.6", postgres: "14", architecture: "x86"}
-          - {python: "3.7", postgres: "13", architecture: "x86"}
-          - {python: "3.8", postgres: "12", architecture: "x86"}
-          - {python: "3.9", postgres: "11", architecture: "x86"}
-          - {python: "3.10", postgres: "10", architecture: "x86"}
-          - {python: "3.11-dev", postgres: "10", architecture: "x86"}
+          - {python: "3.10", postgres: "18", architecture: "x86"}
+          - {python: "3.11", postgres: "17", architecture: "x86"}
+          - {python: "3.12", postgres: "16", architecture: "x86"}
+          - {python: "3.13", postgres: "15", architecture: "x86"}
+          - {python: "3.14", postgres: "14", architecture: "x86"}
+          - {python: "3.15", postgres: "13", architecture: "x86"}
 
     env:
       PSYCOPG2_TESTDB: postgres
@@ -49,14 +52,29 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: actions/checkout@v2
-      - name: Install tox
-        run: pip install tox
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v6
+
+      # Can enable to test an unreleased libpq version.
+      - name: install libpq 16
+        if: false
+        run: |
+          set -x
+          rel=$(lsb_release -c -s)
+          echo "deb http://apt.postgresql.org/pub/repos/apt ${rel}-pgdg main 16" \
+            | sudo tee -a /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get -qq update
+          pqver=$(apt-cache show libpq5  | grep ^Version: | head -1 \
+            | awk '{print $2}')
+          sudo apt-get -qq -y install "libpq-dev=${pqver}" "libpq5=${pqver}"
+
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python }}
+          allow-prereleases: true
+      - name: Install
+        run: pip install .
       - name: Run tests
         env:
-          MATRIX_PYTHON: ${{ matrix.python }}
-        run: tox -e ${MATRIX_PYTHON%-dev}
+          PYTHON_VERSION: ${{ matrix.python }}
+        run: make check
         timeout-minutes: 5

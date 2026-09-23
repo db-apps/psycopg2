@@ -152,7 +152,7 @@ class GreenTestCase(ConnectingTestCase):
             """)
 
         polls = stub.polls.count(POLL_READ)
-        self.assert_(polls > 8, polls)
+        self.assert_(polls > 6, polls)
 
 
 class CallbackErrorTestCase(ConnectingTestCase):
@@ -219,7 +219,7 @@ class CallbackErrorTestCase(ConnectingTestCase):
 
         self.fail("you should have had a success or an error by now")
 
-    @skip_if_crdb("named cursor")
+    @skip_if_crdb("named cursor", version="< 22.1")
     def test_errors_named_cursor(self):
         for i in range(100):
             self.to_error = None

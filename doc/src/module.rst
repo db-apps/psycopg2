@@ -168,7 +168,7 @@ available through the following exceptions:
 
         >>> e.pgcode
         '42P01'
-        >>> print e.pgerror
+        >>> print(e.pgerror)
         ERROR:  relation "barf" does not exist
         LINE 1: SELECT * FROM barf
                               ^
@@ -184,7 +184,7 @@ available through the following exceptions:
 
             >>> try:
             ...     cur.execute("SELECT * FROM barf")
-            ... except psycopg2.Error, e:
+            ... except psycopg2.Error as e:
             ...     pass
 
             >>> e.diag.severity

@@ -43,6 +43,9 @@
 {"0Z000", "DiagnosticsException"},
 {"0Z002", "StackedDiagnosticsAccessedWithoutActiveHandler"},
 
+/* Class 10 - XQuery Error */
+{"10608", "InvalidArgumentForXquery"},
+
 /* Class 20 - Case Not Found */
 {"20000", "CaseNotFound"},
 
@@ -111,6 +114,7 @@
 {"2203D", "TooManyJsonArrayElements"},
 {"2203E", "TooManyJsonObjectMembers"},
 {"2203F", "SqlJsonScalarRequired"},
+{"2203G", "SqlJsonItemCannotBeCastToTargetType"},
 {"22P01", "FloatingPointException"},
 {"22P02", "InvalidTextRepresentation"},
 {"22P03", "InvalidBinaryRepresentation"},
@@ -143,6 +147,7 @@
 {"25P01", "NoActiveSqlTransaction"},
 {"25P02", "InFailedSqlTransaction"},
 {"25P03", "IdleInTransactionSessionTimeout"},
+{"25P04", "TransactionTimeout"},
 
 /* Class 26 - Invalid SQL Statement Name */
 {"26000", "InvalidSqlStatementName"},
@@ -286,6 +291,7 @@
 {"58030", "IoError"},
 {"58P01", "UndefinedFile"},
 {"58P02", "DuplicateFile"},
+{"58P03", "FileNameTooLong"},
 
 /* Class 72 - Snapshot Failure */
 {"72000", "SnapshotTooOld"},

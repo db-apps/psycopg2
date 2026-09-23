@@ -255,6 +255,7 @@ latex_documents = [
 # If false, no module index is generated.
 # latex_use_modindex = True
 
+toc_object_entries = False
 
 doctest_global_setup = """
 
@@ -276,7 +277,7 @@ def drop_test_table(name):
     cur.execute("SAVEPOINT drop_test_table;")
     try:
         cur.execute("DROP TABLE %s;" % name)
-    except:
+    except Exception:
         cur.execute("ROLLBACK TO SAVEPOINT drop_test_table;")
     conn.commit()
 

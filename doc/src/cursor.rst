@@ -208,6 +208,14 @@ The ``cursor`` class
         Parameters are bounded to the query using the same rules described in
         the `~cursor.execute()` method.
 
+        .. code:: python
+
+            >>> nums = ((1,), (5,), (10,))
+            >>> cur.executemany("INSERT INTO test (num) VALUES (%s)", nums)
+
+            >>> tuples = ((123, "foo"), (42, "bar"), (23, "baz"))
+            >>> cur.executemany("INSERT INTO test (num, data) VALUES (%s, %s)", tuples)
+
         .. warning::
             In its current implementation this method is not faster than
             executing `~cursor.execute()` in a loop. For better performance
@@ -284,7 +292,7 @@ The ``cursor`` class
 
             >>> cur.execute("SELECT * FROM test;")
             >>> for record in cur:
-            ...     print record
+            ...     print(record)
             ...
             (1, 100, "abc'def")
             (2, None, 'dada')
